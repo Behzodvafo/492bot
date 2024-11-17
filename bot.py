@@ -1,6 +1,6 @@
 import os
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from handlers import start, handle_message, broadcast_message
+from handlers import start, handle_message, broadcast_message, send_detailed_stats_to_admin
 
 # Загрузка переменной окружения для токена
 TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -14,11 +14,9 @@ def main():
     # Регистрация обработчиков
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("broadcast", broadcast_message))
+    dp.add_handler(CommandHandler("stats", send_detailed_stats_to_admin))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
-from handlers import send_detailed_stats_to_admin
 
-# Регистрация команды /stats
-dp.add_handler(CommandHandler("stats", send_detailed_stats_to_admin))
     # Запуск бота
     updater.start_polling()
     updater.idle()
