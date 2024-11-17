@@ -19,6 +19,13 @@ def handle_message(update, context):
 
         save_user_data(user_id, username, car_number)
 
+        # Notify admin about the request
+        context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=f"User @{username} (ID: {user_id}) requested car information for car number: /{car_number}."
+        )
+
+        
         if not car_number.isdigit():
             update.message.reply_text("Please enter the car number as a number.")
             return
