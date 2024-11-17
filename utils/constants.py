@@ -1,3 +1,7 @@
+import os 
+# ID администратора 
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
+
 # Маппинг типов автомобилей
 CAR_TYPE_MAPPING = {
     "1": "Sedan",
