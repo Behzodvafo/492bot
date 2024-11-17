@@ -15,7 +15,10 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("broadcast", broadcast_message))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+from handlers import send_detailed_stats_to_admin
 
+# Регистрация команды /stats
+dp.add_handler(CommandHandler("stats", send_detailed_stats_to_admin))
     # Запуск бота
     updater.start_polling()
     updater.idle()
