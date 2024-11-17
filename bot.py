@@ -20,5 +20,13 @@ def main():
     updater.start_polling()
     updater.idle()
 
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Bot is running", 200
+
 if __name__ == "__main__":
     main()
