@@ -99,3 +99,38 @@ def broadcast_message(update, context):
             failed_users.append(user["user_id"])
 
     update.message.reply_text(f"Broadcast completed. Failed: {len(failed_users)}")
+
+from utils.user_data import get_detailed_statistics
+from utils.constants import ADMIN_ID
+
+def send_detailed_stats_to_admin(update, context):
+    # Только для администратора
+    if update.message.from_user.id != ADMIN_ID:
+        update.message.reply_text("You do not have permission to use this command.")
+        return
+
+    # Получаем полную статистику
+    detailed_stats = get_detailed_statistics()
+
+    if not detailed_stats:
+        update.message.reply_text("No user data available.")
+        return
+
+    # Формируем подробное сообщение
+    stats_message = "📊 Detailed User Statistics:\n"
+
+    for user_id, stats in detailed_stats.items():
+        stats_message += (
+            f"👤 User: @{stats['username']} (ID: {user_id})\n"
+            f"   - Total Requests: {stats['total_requests']}\n"
+            f"   - Requests:\n"
+        )
+        for req in stats["requests"]:
+            stats_message += (
+                f"      • Car Number: {req['car_number']} "
+                f"(Timestamp: {req['timestamp']})\n"
+            )
+        stats_message += "\n"
+
+    # Отправляем статистику администратору
+    context.bot.send_message(chat_id=ADMIN_ID, text=stats_message)
