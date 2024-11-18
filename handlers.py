@@ -11,6 +11,21 @@ RESTRICTED_CAR_NUMBER = int(os.getenv("RESTRICTED_CAR_NUMBER"))
 def start(update, context):
     update.message.reply_text("Hello! Enter the car number to get information.")
 
+def format_car_information(car_info, details, hidden_value, company_name, car_type):
+    formatted_details = details.replace("-Cell#:", "\n📞 *Phone:*").replace(" -", "\n• ")
+    message = (
+        "📋 *General Information:*\n"
+        f"• *Car Number:* {car_info['CarNo']}\n"
+        f"• *Company:* {company_name}\n"
+        f"• *Car Type:* {car_type}\n"
+        f"• *In Shift:* {'Yes' if car_info['InShift'] == '1' else 'No'}\n"
+        f"• *Shift Day:* {car_info['shiftday'] if car_info['shiftday'] else 'No data'}\n\n"
+        "📄 *Detailed Information:*\n"
+        f"{formatted_details}\n\n"
+        f"📍 *Destination:* {hidden_value}"
+    )
+    return message
+
 def handle_message(update, context):
     try:
         car_number = update.message.text.strip()
