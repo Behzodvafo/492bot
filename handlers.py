@@ -32,51 +32,31 @@ def handle_message(update, context):
         user_id = update.message.from_user.id
         username = update.message.from_user.username
 
-        save_user_data(user_id, username, car_number)
-
-        # Notify admin about the request
-        context.bot.send_message(
-            chat_id=ADMIN_ID,
-            text=f"User @{username} (ID: {user_id}) requested car information for car number: /{car_number}."
-        )
-
-        
+        # Проверка на корректность ввода
         if not car_number.isdigit():
             update.message.reply_text("Please enter the car number as a number.")
             return
 
         car_number = int(car_number)
 
-        if car_number == RESTRICTED_CAR_NUMBER and user_id != ADMIN_ID:
-            context.bot.send_animation(
-                chat_id=update.message.chat_id,
-                animation="https://i.pinimg.com/originals/98/68/e8/9868e87dc36fa2bffb357d708d457f31.gif"
-            )
-            return
-
-        root = get_car_list()
+        # Получение списка машин
+        root = get_car_list()  # API-запрос или загрузка данных
         if root:
             car_info = find_car_in_list(root, car_number)
             if car_info:
                 details, image_url, hidden_value = get_car_details(car_info["CarNo"], car_info["Comp"])
                 if details:
-                    car_type = CAR_TYPE_MAPPING.get(car_info['CarType'], "Unknown type")
-                    company_name = COMPANY_MAPPING.get(car_info['Comp'], "Unknown company")
-                    context.bot.send_location(
-                        chat_id=update.message.chat_id,
-                        latitude=float(car_info['lat']),
-                        longitude=float(car_info['lng'])
-                    )
-                    message = (
-                        f"Car Number: {car_info['CarNo']}\n"
-                        f"Company: {company_name}\n"
-                        f"Car Type: {car_type}\n"
-                        f"Details: {details}\n"
-                        f"Destination: {hidden_value}"
-                    )
-                    update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN)
+                    # Форматируем сообщение
+                    company_name = COMPANY_MAPPING.get(car_info["Comp"], "Unknown company")
+                    car_type = CAR_TYPE_MAPPING.get(car_info["CarType"], "Unknown type")
+                    message = format_car_information(car_info, details, hidden_value, company_name, car_type)
+
+                    # Отправляем сообщение пользователю
+                    update.message.reply_text(message, parse_mode='Markdown')
+
+                    # Отправляем фото, если доступно
                     if image_url:
-                        context.bot.send_photo(chat_id=update.message.chat_id, photo=image_url)
+                        context.bot.send_photo(chat_id=update.message.chat_id, photo=image_url, caption="Driver photo")
                 else:
                     update.message.reply_text("Failed to retrieve detailed information.")
             else:
@@ -84,7 +64,7 @@ def handle_message(update, context):
         else:
             update.message.reply_text("Failed to retrieve car list data.")
     except Exception as e:
-        update.message.reply_text("An error occurred. Please try again later.")
+        update.message.reply_text(f"An error occurred: {e}")
 
 def broadcast_message(update, context):
     from utils.user_data import load_user_data
